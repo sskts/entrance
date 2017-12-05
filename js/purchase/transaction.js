@@ -108,10 +108,13 @@ function getTransaction(args) {
                 : (/production/i.test(location.hostname))
                     ? development + 'production-staging.azurewebsites.net'
                     : production;
+    if (/localhost/i.test(document.referrer)) {
+        endPoint = new URL(document.referrer).origin
+    }
     var option = {
-        dataType: 'json',
+        dataType: 'jsonp',
         url: endPoint + '/purchase/transaction',
-        type: 'POST',
+        type: 'GET',
         timeout: 10000,
         data: args
     };
