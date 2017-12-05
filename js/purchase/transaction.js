@@ -90,6 +90,7 @@ function getToken() {
  * @returns {void}
  */
 function getTransaction(args) {
+    var local;
     var development;
     var production;
     if (isFixed()) {
@@ -99,17 +100,15 @@ function getTransaction(args) {
         development = 'https://sskts-frontend-';
         production = 'https://ticket-cinemasunshine.com';
     }
-    var endPoint = (/localhost/i.test(location.hostname))
-        ? ''
-        : (/development/i.test(location.hostname))
-            ? development + 'development.azurewebsites.net'
-            : (/test/i.test(location.hostname))
-                ? development + 'test.azurewebsites.net'
-                : (/production/i.test(location.hostname))
-                    ? development + 'production-staging.azurewebsites.net'
-                    : production;
+    var endPoint = (/development/i.test(location.hostname))
+        ? development + 'development.azurewebsites.net'
+        : (/test/i.test(location.hostname))
+            ? development + 'test.azurewebsites.net'
+            : (/production/i.test(location.hostname))
+                ? development + 'production-staging.azurewebsites.net'
+                : production;
     if (/localhost/i.test(document.referrer)) {
-        endPoint = new URL(document.referrer).origin
+        endPoint = (isApp()) ? 'https://localhost' : new URL(document.referrer).origin;
     }
     var option = {
         dataType: 'jsonp',
