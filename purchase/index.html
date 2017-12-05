@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <title>シネマサンシャイン／チケット予約</title>
+    <meta name="description" content="シネマサンシャインオンラインチケット。簡単操作でチケット購入をしていただけます。">
+    <meta name="keywords" content="シネマサンシャイン,映画,シネマ,チケット購入">
+    <meta name="viewport" content="width=device-width,user-scalable=no,maximum-scale=1">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="robots" content="noindex">
+    <link rel="shortcut icon" href="../images/favicon.ico" type="image/vnd.microsoft.icon">
+    <link rel="icon" href="../images/favicon.ico" type="image/vnd.microsoft.icon">
+    <link rel="apple-touch-icon" href="images/touch_icon.png">
+    <link href="../css/style.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
+        crossorigin="anonymous"></script>
+    <script src="../js/purchase/transaction.js"></script>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="wrapper-inner" style="display: none">
+            <header class="header clearfix">
+                <div class="inner">
+                    <div class="logo">
+                        <a href="javascript:history.back();"><img src="../images/default/common/logo.svg" alt="シネマサンシャイン"></a>
+                    </div>
+                </div>
+            </header>
+
+            <div class="contents">
+                <div class="access-error not-display">
+                    <h1 class="page-ttl">エラーが発生しました。</h1>
+                    <p class="read">
+                        お手続きの途中でエラーが発生いたしました。<br>
+                        お手数をおかけいたしますが、もう一度最初から操作をお願いいたします。
+                    </p>
+                    <div class="prev-link"><a class="icon-prev-black" href="javascript:history.back();">戻る</a></div>
+                </div>
+                <div class="access-congestion not-display">
+                    <h1 class="page-ttl">只今、アクセスが混雑しております。</h1>
+                    <p class="read">
+                        現在アクセスが集中しております。<br>
+                        誠に申し訳ございませんがしばらく時間を置いてから再度アクセスしてください。
+                    </p>
+                    <div class="prev-link"><a class="icon-prev-black" href="javascript:history.back();">戻る</a></div>
+                </div>
+                <div class="not-recommended not-display">
+                    <h1 class="page-ttl">お使いのブラウザは対応していません。</h1>
+                    <p class="read">
+                        ブラウザを最新バージョンへアップデートしてください。
+                    </p>
+                    <div class="prev-link"><a class="icon-prev-black" href="javascript:history.back();">戻る</a></div>
+                </div>
+                <div class="maintenance not-display">
+                    <h1 class="page-ttl">メンテナンス中</h1>
+                    <p class="read">
+                        10/31(火）AM0:00～AM5:00はメンテナンスの為、<br class="device-type-pc">インターネットでの販売を停止させていただきます。<br>ご不便をおかけして申し訳ございません。
+                    </p>
+                    <div class="prev-link"><a class="icon-prev-black" href="javascript:history.back();">戻る</a></div>
+                </div>
+            </div>
+
+            <footer class="footer">
+                <div class="inner">
+                    <ul class="clearfix">
+                        <li><a href="http://www.cinemasunshine.co.jp/privacy/" target="_blank">プライバシーポリシー</a></li>
+                        <li><a href="http://www.cinemasunshine.co.jp/law/" target="_blank">特定商取引法に基づく表記</a></li>
+                    </ul>
+                    <div class="copyright">Copyright (C) 2001-2017 Cinema Sunshine Co., Ltd. All Rights Reserved.</div>
+                </div>
+            </footer>
+        </div>
+    </div>
+    <div class="modal-cover" onclick=""></div>
+    <div class="loading-cover"></div>
+    <div class="loading">
+        <div class="bar bar1"></div><div class="bar bar2"></div><div class="bar bar3"></div><div class="bar bar4"></div><div class="bar bar5"></div>
+    </div>
+</body>
+
+</html>
