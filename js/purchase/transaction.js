@@ -18,9 +18,9 @@ function getToken() {
         showAccessError();
         return;
     }
-    var endPoint = (/development|localhost/i.test(location.hostname))
+    var endPoint = (/development|localhost|d2n1h4enbzumbc/i.test(location.hostname))
         ? 'https://sskts-waiter-development.appspot.com'
-        : (/test/i.test(location.hostname))
+        : (/test|d24x7394fq3aqi/i.test(location.hostname))
             ? 'https://sskts-waiter-test.appspot.com'
             : 'https://sskts-waiter-production.appspot.com';
     var scope = 'placeOrderTransaction.MovieTheater-' + performanceId.slice(0, 3);
@@ -100,15 +100,17 @@ function getTransaction(args) {
         development = 'https://sskts-frontend-';
         production = 'https://ticket-cinemasunshine.com';
     }
-    var endPoint = (/development/i.test(location.hostname))
+    var endPoint = (/development|d2n1h4enbzumbc/i.test(location.hostname))
         ? development + 'development.azurewebsites.net'
-        : (/test/i.test(location.hostname))
+        : (/test|d24x7394fq3aqi/i.test(location.hostname))
             ? development + 'test.azurewebsites.net'
             : (/production/i.test(location.hostname))
                 ? development + 'production-staging.azurewebsites.net'
                 : production;
     if (/localhost/i.test(document.referrer)) {
         endPoint = (isApp()) ? 'https://localhost' : new URL(document.referrer).origin;
+    } else if (/production\-staging/i.test(document.referrer)) {
+        endPoint = development + 'production-staging.azurewebsites.net';
     }
     var option = {
         dataType: 'jsonp',
