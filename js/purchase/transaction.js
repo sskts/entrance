@@ -109,7 +109,7 @@ function redirectToTransaction(args) {
                 : production;
     if (/localhost/i.test(document.referrer)) {
         endPoint = (isApp()) ? 'https://localhost' : new URL(document.referrer).origin;
-    } else if (/production\-staging/i.test(document.referrer)) {
+    } else if (/production\-staging/i.test(document.referrer) || document.referrer === '') {
         endPoint = development + 'production-staging.azurewebsites.net';
     }
     var params = 'performanceId=' + args.performanceId + '&passportToken=' + args.passportToken;
