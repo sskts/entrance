@@ -18,9 +18,9 @@ function getToken() {
         showAccessError();
         return;
     }
-    var endPoint = (/development|localhost|d2n1h4enbzumbc/i.test(location.hostname))
+    var endPoint = (/localhost|d2n1h4enbzumbc/i.test(location.hostname))
         ? 'https://sskts-waiter-development.appspot.com'
-        : (/test|d24x7394fq3aqi/i.test(location.hostname))
+        : (/d24x7394fq3aqi/i.test(location.hostname))
             ? 'https://sskts-waiter-test.appspot.com'
             : 'https://sskts-waiter-production.appspot.com';
     var scope = 'placeOrderTransaction.MovieTheater-' + performanceId.slice(0, 3);
@@ -100,16 +100,15 @@ function redirectToTransaction(args) {
         development = 'https://sskts-frontend-';
         production = 'https://ticket-cinemasunshine.com';
     }
-    var endPoint = (/development|d2n1h4enbzumbc/i.test(location.hostname))
+    var endPoint = (/d2n1h4enbzumbc/i.test(location.hostname))
         ? development + 'development.azurewebsites.net'
-        : (/test|d24x7394fq3aqi/i.test(location.hostname))
+        : (/d24x7394fq3aqi/i.test(location.hostname))
             ? development + 'test.azurewebsites.net'
-            : (/production/i.test(location.hostname))
-                ? development + 'production-staging.azurewebsites.net'
-                : production;
+            : production;
+
     if (/localhost/i.test(document.referrer)) {
         endPoint = (isApp()) ? 'https://localhost' : new URL(document.referrer).origin;
-    } else if (/production\-staging/i.test(document.referrer) || document.referrer === '') {
+    } else if (getParameter()['staging'] !== undefined) {
         endPoint = (isFixed()) ? development + 'production-staging.azurewebsites.net'
             : 'http://prodssktsfrontend-staging.azurewebsites.net';
     }
