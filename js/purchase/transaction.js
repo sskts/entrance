@@ -107,7 +107,11 @@ function redirectToTransaction(args) {
             : production;
 
     if (/localhost/i.test(document.referrer)) {
-        endPoint = (isApp()) ? 'https://localhost' : new URL(document.referrer).origin;
+        if (isIE()) {
+            endPoint = 'https://localhost';
+        } else {
+            endPoint = (isApp()) ? 'https://localhost' : new URL(document.referrer).origin;
+        }
     } else if (getParameter()['staging'] !== undefined) {
         endPoint = (isFixed()) ? development + 'production-staging.azurewebsites.net'
             : 'http://prodssktsfrontend-staging.azurewebsites.net';
@@ -235,6 +239,19 @@ function getParameter() {
         }
     }
     return result;
+}
+
+/**
+ * IE判定
+ */
+function isIE() {
+    var result = false;
+    var userAgent = window.navigator.userAgent.toLowerCase();
+    if (userAgent.match(/(msie|MSIE)/) || userAgent.match(/(T|t)rident/)) {
+        result = true;
+        var ieVersion = userAgent.match(/((msie|MSIE)\s|rv:)([\d\.]+)/)[3];
+        ieVersion = parseInt(ieVersion);
+    }
 }
 
 /**
