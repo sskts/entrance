@@ -8,6 +8,17 @@ $(function () {
 });
 
 /**
+ * エントランス取得
+ */
+function getEntranceRegExp() {
+    return {
+        development: /localhost|d2n1h4enbzumbc/i,
+        test: /d24x7394fq3aqi/i,
+        production: /https\:\/\/sskts\-waiter\-production\.appspot\.com/i
+    };
+}
+
+/**
  * トークン取得
  * @function getToken
  * @returns {void}
@@ -18,11 +29,17 @@ function getToken() {
         showAccessError();
         return;
     }
-    var endPoint = (/localhost|d2n1h4enbzumbc/i.test(location.hostname))
-        ? 'https://sskts-waiter-development.appspot.com'
-        : (/d24x7394fq3aqi/i.test(location.hostname))
-            ? 'https://sskts-waiter-test.appspot.com'
-            : 'https://sskts-waiter-production.appspot.com';
+    var entrance = getEntranceRegExp();
+    var waiter = {
+        development: 'https://sskts-waiter-development.appspot.com',
+        test: 'https://sskts-waiter-test.appspot.com',
+        production: 'https://sskts-waiter-production.appspot.com'
+    };
+    var endPoint = (entrance.development.test(location.hostname))
+        ? waiter.development
+        : (entrance.test.test(location.hostname))
+            ? waiter.test
+            : waiter.production;
     var scope = 'placeOrderTransaction.MovieTheater-' + performanceId.slice(0, 3);
     var option = {
         dataType: 'json',
@@ -42,12 +59,10 @@ function getToken() {
     }
     var prosess = function (data, jqXhr) {
         if (jqXhr.status === HTTP_STATUS.CREATED) {
-            var redirectToTransactionArgs = {
+            redirectToTransaction({
                 performanceId: performanceId,
-                identityId: getParameter()['identityId'],
                 passportToken: data.token
-            };
-            redirectToTransaction(redirectToTransactionArgs);
+            });
         } else if (jqXhr.status === HTTP_STATUS.BAD_REQUEST
             || jqXhr.status === HTTP_STATUS.NOT_FOUND) {
             // アクセスエラー
@@ -85,26 +100,42 @@ function getToken() {
  * 取引取得
  * @param {Object} args
  * @param {string} args.performanceId
- * @param {string | undefined} args.identityId
  * @param {string} args.passportToken
  * @returns {void}
  */
 function redirectToTransaction(args) {
-    var local;
-    var development;
-    var production;
-    if (isFixed()) {
-        development = 'https://sskts-frontend-fixed-';
-        production = 'https://machine.ticket-cinemasunshine.com';
-    } else {
-        development = 'https://sskts-frontend-';
-        production = 'https://ticket-cinemasunshine.com';
+    var entrance = getEntranceRegExp();
+    var frontend = {
+        development: 'https://sskts-frontend-development.azurewebsites.net',
+        test: 'https://sskts-frontend-test.azurewebsites.net',
+        production: 'https://ticket-cinemasunshine.com'
     }
-    var endPoint = (/d2n1h4enbzumbc/i.test(location.hostname))
-        ? development + 'development.azurewebsites.net'
-        : (/d24x7394fq3aqi/i.test(location.hostname))
-            ? development + 'test.azurewebsites.net'
-            : production;
+    var frontendStaging = {
+        development: 'https://sskts-frontend-development-staging.azurewebsites.net',
+        test: 'https://sskts-frontend-test-staging.azurewebsites.net',
+        production: 'https://sskts-frontend-production-staging.azurewebsites.net'
+    }
+    var frontendFixed = {
+        development: 'https://sskts-frontend-fixed-development.azurewebsites.net',
+        test: 'https://sskts-frontend-fixed-test.azurewebsites.net',
+        production: 'https://machine.ticket-cinemasunshine.com'
+    }
+    var frontendFixedStaging = {
+        development: 'https://sskts-frontend-fixed-development-staging.azurewebsites.net',
+        test: 'https://sskts-frontend-fixed-test-staging.azurewebsites.net',
+        production: 'https://sskts-frontend-fixed-production-staging.azurewebsites.net'
+    }
+    var domain = (isFixed()) ? frontendFixed : frontend;
+    if (getParameter()['staging'] !== undefined
+        && getParameter()['staging']) {
+        domain = (isFixed()) ? frontendFixedStaging : frontendStaging;
+    }
+
+    var endPoint = (entrance.development.test(location.hostname))
+        ? domain.development
+        : (entrance.test.test(location.hostname))
+            ? domain.test
+            : domain.production;
 
     if (/localhost/i.test(document.referrer)) {
         if (isIE()) {
@@ -112,14 +143,25 @@ function redirectToTransaction(args) {
         } else {
             endPoint = (isApp()) ? 'https://localhost' : new URL(document.referrer).origin;
         }
-    } else if (getParameter()['staging'] !== undefined) {
-        endPoint = (isFixed()) ? development + 'production-staging.azurewebsites.net'
-            : 'http://prodssktsfrontend-staging.azurewebsites.net';
     }
+
     var params = 'performanceId=' + args.performanceId + '&passportToken=' + args.passportToken;
     if (args.identityId !== undefined) {
         params += '&identityId=' + args.identityId;
     }
+    var native = getParameter()['native'];
+    if (native !== undefined) {
+        params += '&native=' + native;
+    }
+    var identityId = getParameter()['identityId'];
+    if (identityId !== undefined) {
+        params += '&identityId=' + identityId;
+    }
+    var member = getParameter()['member'];
+    if (member !== undefined) {
+        params += '&member=' + member;
+    }
+
     var url = endPoint + '/purchase/transaction?' + params;
     location.replace(url);
 }
