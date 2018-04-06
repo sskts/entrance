@@ -161,6 +161,10 @@ function redirectToTransaction(args) {
     if (member !== undefined) {
         params += '&member=' + member;
     }
+    var accessToken = getParameter()['accessToken'];
+    if (accessToken !== undefined) {
+        params += '&accessToken=' + accessToken;
+    }
 
     var url = endPoint + '/purchase/transaction?' + params;
     location.replace(url);
