@@ -113,7 +113,7 @@ function redirectToTransaction(args) {
     var frontendStaging = {
         development: 'https://sskts-frontend-development-staging.azurewebsites.net',
         test: 'https://sskts-frontend-test-staging.azurewebsites.net',
-        production: 'https://sskts-frontend-production-staging.azurewebsites.net'
+        production: 'https://prodssktsfrontend-staging.azurewebsites.net'
     }
     var frontendFixed = {
         development: 'https://sskts-frontend-fixed-development.azurewebsites.net',
