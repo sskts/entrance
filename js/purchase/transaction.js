@@ -59,10 +59,7 @@ function getToken() {
     }
     var prosess = function (data, jqXhr) {
         if (jqXhr.status === HTTP_STATUS.CREATED) {
-            redirectToTransaction({
-                performanceId: performanceId,
-                passportToken: data.token
-            });
+            redirectToTransaction({ passportToken: data.token });
         } else if (jqXhr.status === HTTP_STATUS.BAD_REQUEST
             || jqXhr.status === HTTP_STATUS.NOT_FOUND) {
             // アクセスエラー
@@ -99,7 +96,6 @@ function getToken() {
 /**
  * 取引取得
  * @param {Object} args
- * @param {string} args.performanceId
  * @param {string} args.passportToken
  * @returns {void}
  */
@@ -145,28 +141,12 @@ function redirectToTransaction(args) {
         }
     }
 
-    var params = 'performanceId=' + args.performanceId + '&passportToken=' + args.passportToken;
-    if (args.identityId !== undefined) {
-        params += '&identityId=' + args.identityId;
-    }
-    var native = getParameter()['native'];
-    if (native !== undefined) {
-        params += '&native=' + native;
-    }
-    var identityId = getParameter()['identityId'];
-    if (identityId !== undefined) {
-        params += '&identityId=' + identityId;
-    }
-    var member = getParameter()['member'];
-    if (member !== undefined) {
-        params += '&member=' + member;
-    }
-    var accessToken = getParameter()['accessToken'];
-    if (accessToken !== undefined) {
-        params += '&accessToken=' + accessToken;
-    }
+    var params = getParameter();
+    params.performanceId = getParameter()['id'];
+    params.passportToken = args.passportToken;
+    var query = toQueryString(params);
 
-    var url = endPoint + '/purchase/transaction?' + params;
+    var url = endPoint + '/purchase/transaction?' + query;
     location.replace(url);
 }
 
@@ -286,6 +266,20 @@ function getParameter() {
     }
     return result;
 }
+
+/**
+ * クエリ変換
+ * @param {Object} obj 
+ */
+function toQueryString(obj) {
+    var keys = Object.keys(obj);
+    var query = "";
+    for (var i = 0; i < keys.length; i++) {
+        query += keys[i] + "=" + encodeURIComponent(obj[keys[i]]);
+        if (i != keys.length - 1) query += "&";
+    }
+    return query;
+};
 
 /**
  * IE判定
