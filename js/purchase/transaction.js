@@ -30,20 +30,26 @@ function getToken() {
         return;
     }
     var entrance = getEntranceRegExp();
-    var waiter = {
-        development: 'https://sskts-waiter-development.appspot.com',
-        test: 'https://sskts-waiter-test.appspot.com',
-        production: 'https://sskts-waiter-production.appspot.com'
-    };
-    var endPoint = (entrance.development.test(location.hostname))
-        ? waiter.development
+    var env = (entrance.development.test(location.hostname))
+        ? 'development'
         : (entrance.test.test(location.hostname))
-            ? waiter.test
-            : waiter.production;
+            ? 'test'
+            : 'production';
+    var waiter = {
+        development: 'https://waiter-development.appspot.com',
+        test: 'https://waiter-test.appspot.com',
+        production: 'https://waiter-production.appspot.com'
+    };
+    var projectId = {
+        development: 'sskts-development',
+        test: 'sskts-test',
+        production: 'sskts-production'
+    };
+    var url = waiter[env] + '/projects/' + projectId[env] + '/passports';
     var scope = 'placeOrderTransaction.MovieTheater-' + performanceId.slice(0, 3);
     var option = {
         dataType: 'json',
-        url: endPoint + '/passports',
+        url: url,
         type: 'POST',
         timeout: 10000,
         data: {
