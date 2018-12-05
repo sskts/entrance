@@ -37,7 +37,7 @@ function getToken() {
             : 'production';
     var waiter = {
         development: 'https://waiter-development.appspot.com',
-        test: 'https://waiter-test.appspot.com',
+        test: 'https://waiter-test-224022.appspot.com',
         production: 'https://waiter-production.appspot.com'
     };
     var projectId = {
