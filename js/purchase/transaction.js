@@ -79,7 +79,6 @@ function getEntranceRegExp() {
 function getToken(id, sellerId) {
     var url = createWaiterUrl();
     var scope = 'Transaction:PlaceOrder:' + sellerId;
-    var scope = 'placeOrderTransaction.MovieTheater-' + id.slice(0, 3);
     var option = {
         dataType: 'json',
         url: url,
