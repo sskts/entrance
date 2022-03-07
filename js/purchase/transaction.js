@@ -4,7 +4,59 @@ $(function () {
         $('.wrapper-inner').show();
         return;
     }
-    getToken();
+    var id = getParameter()['id'];
+    var sellerId = getParameter()['sellerId'];
+    if (id === undefined
+        || sellerId === undefined) {
+        showError('error');
+        return;
+    }
+    var congestion = JSON.parse(sessionStorage.getItem('congestion'));
+    if (congestion !== null
+        && Date.now() < congestion.expired
+        && sellerId === congestion.sellerId) {
+        // 混雑期間内
+        showError('congestion');
+        return;
+    }
+    loadingStart();
+    getToken(id, sellerId)
+        .done(function (data) {
+            var params = getParameter();
+            if (params.redirectUrl === undefined
+                || params.id === undefined) {
+                showError('error');
+                loadingEnd();
+                return;
+            }
+            params.performanceId = params.id;
+            params.passportToken = data.token;
+            var query = toQueryString(params);
+            var url = decodeURIComponent(params.redirectUrl) + '/purchase/transaction?' + query;
+            // location.href = url;
+            location.replace(url);
+        })
+        .fail(function (jqXhr, textStatus, error) {
+            console.error(jqXhr, textStatus, error);
+            var status = jqXhr.status;
+            if (status === HTTP_STATUS.TOO_MANY_REQUESTS
+                || status === HTTP_STATUS.INTERNAL_SERVER_ERROR) {
+                // 混雑エラー
+                var expired = Date.now() + 10000;
+                sessionStorage.setItem('congestion', JSON.stringify({
+                    expired: expired,
+                    sellerId: sellerId
+                }));
+                showError('congestion');
+            } else if (status === HTTP_STATUS.SERVICE_UNAVAILABLE) {
+                // メンテナンス
+                showError('maintenance');
+            } else {
+                // アクセスエラー
+                showError('error');
+            }
+            loadingEnd();
+        });;
 });
 
 /**
@@ -20,15 +72,30 @@ function getEntranceRegExp() {
 
 /**
  * トークン取得
- * @function getToken
- * @returns {void}
+ * @param {string} id 
+ * @param {string} sellerId 
+ * @returns 
  */
-function getToken() {
-    var performanceId = getParameter()['id'];
-    if (performanceId === undefined) {
-        showAccessError();
-        return;
-    }
+function getToken(id, sellerId) {
+    var url = createWaiterUrl();
+    var scope = 'Transaction:PlaceOrder:' + sellerId;
+    var option = {
+        dataType: 'json',
+        url: url,
+        type: 'POST',
+        timeout: 10000,
+        data: {
+            scope: scope
+        }
+    };
+
+    return $.ajax(option);
+}
+
+/**
+ * ウエイターURL作成
+ */
+function createWaiterUrl() {
     var entrance = getEntranceRegExp();
     var env = (entrance.development.test(location.hostname))
         ? 'development'
@@ -46,143 +113,22 @@ function getToken() {
         production: 'sskts-production'
     };
     var url = waiter[env] + '/projects/' + projectId[env] + '/passports';
-    var scope = 'placeOrderTransaction.MovieTheater-' + performanceId.slice(0, 3);
-    var option = {
-        dataType: 'json',
-        url: url,
-        type: 'POST',
-        timeout: 10000,
-        data: {
-            scope: scope
-        }
-    };
-    var expired = Date.now() + 60000;
-    var congestion = JSON.parse(sessionStorage.getItem('congestion'));
-    if (congestion !== null && Date.now() < congestion.expired && scope === congestion.scope) {
-        // 混雑期間内
-        showAccessCongestionError();
-        return;
-    }
-    var prosess = function (data, jqXhr) {
-        if (jqXhr.status === HTTP_STATUS.CREATED) {
-            redirectToTransaction({ passportToken: data.token });
-        } else if (jqXhr.status === HTTP_STATUS.BAD_REQUEST
-            || jqXhr.status === HTTP_STATUS.NOT_FOUND) {
-            // アクセスエラー
-            showAccessError();
-            loadingEnd();
-        } else if (jqXhr.status === HTTP_STATUS.TOO_MANY_REQUESTS
-            || jqXhr.status === HTTP_STATUS.INTERNAL_SERVER_ERROR) {
-            // 混雑エラー
-            sessionStorage.setItem('congestion', JSON.stringify({
-                expired: expired,
-                scope: scope
-            }));
-            showAccessCongestionError();
-            loadingEnd();
-        } else if (jqXhr.status === HTTP_STATUS.SERVICE_UNAVAILABLE) {
-            // メンテナンス
-            showMaintenance();
-            loadingEnd();
-        }
-    }
 
-    var doneFunction = function (data, textStatus, jqXhr) {
-        prosess(data, jqXhr);
-    };
-    var failFunction = function (jqXhr, textStatus, error) {
-        prosess(null, jqXhr);
-    };
-    loadingStart();
-    $.ajax(option)
-        .done(doneFunction)
-        .fail(failFunction);
-}
-
-/**
- * 取引取得
- * @param {Object} args
- * @param {string} args.passportToken
- * @returns {void}
- */
-function redirectToTransaction(args) {
-    var entrance = getEntranceRegExp();
-    var frontend = {
-        development: 'https://sskts-frontend-development.azurewebsites.net',
-        test: 'https://sskts-frontend-test.azurewebsites.net',
-        production: 'https://ticket-cinemasunshine.com'
-    }
-    var frontendStaging = {
-        development: 'https://sskts-frontend-development-staging.azurewebsites.net',
-        test: 'https://sskts-frontend-test-staging.azurewebsites.net',
-        production: 'https://prodssktsfrontend-staging.azurewebsites.net'
-    }
-    var frontendFixed = {
-        development: 'https://sskts-frontend-fixed-development.azurewebsites.net',
-        test: 'https://sskts-frontend-fixed-test.azurewebsites.net',
-        production: 'https://machine.ticket-cinemasunshine.com'
-    }
-    var frontendFixedStaging = {
-        development: 'https://sskts-frontend-fixed-development-staging.azurewebsites.net',
-        test: 'https://sskts-frontend-fixed-test-staging.azurewebsites.net',
-        production: 'https://sskts-frontend-fixed-production-staging.azurewebsites.net'
-    }
-    var domain = (isFixed()) ? frontendFixed : frontend;
-    if (getParameter()['staging'] !== undefined
-        && getParameter()['staging']) {
-        domain = (isFixed()) ? frontendFixedStaging : frontendStaging;
-    }
-
-    var endPoint = (entrance.development.test(location.hostname))
-        ? domain.development
-        : (entrance.test.test(location.hostname))
-            ? domain.test
-            : domain.production;
-
-    if (/localhost/i.test(document.referrer)) {
-        if (isIE()) {
-            endPoint = 'https://localhost';
-        } else {
-            endPoint = (isApp()) ? 'https://localhost' : new URL(document.referrer).origin;
-        }
-    }
-
-    var params = getParameter();
-    params.performanceId = getParameter()['id'];
-    params.passportToken = args.passportToken;
-    var query = toQueryString(params);
-
-    var url = endPoint + '/purchase/transaction?' + query;
-    location.replace(url);
-}
-
-/**
- * メンテナンス表示
- * @function showMaintenance
- * @returns {void}
- */
-function showMaintenance() {
-    $('.maintenance').show();
-    $('.wrapper-inner').show();
+    return url;
 }
 
 /**
  * アクセスエラー表示
- * @function showAccessError
- * @returns {void}
+ * @param {string} errorType 
  */
-function showAccessError() {
-    $('.access-error').show();
-    $('.wrapper-inner').show();
-}
-
-/**
- * アクセス混雑エラー表示
- * @function showAccessCongestionError
- * @returns {void}
- */
-function showAccessCongestionError() {
-    $('.access-congestion').show();
+function showError(errorType) {
+    if (errorType === 'maintenance') {
+        $('.maintenance').show();
+    } else if (errorType === 'congestion') {
+        $('.access-congestion').show();
+    } else {
+        $('.access-error').show();
+    }
     $('.wrapper-inner').show();
 }
 
