@@ -105,7 +105,7 @@ function createWaiterUrl() {
     var waiter = {
         development: 'https://waiter-development.appspot.com',
         test: 'https://waiter-test-224022.appspot.com',
-        production: 'https://waiter-production.appspot.com'
+        production: 'https://waiter.smart-theater.com'
     };
     var projectId = {
         development: 'sskts-development',
